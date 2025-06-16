@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentation Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #121212;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: #FFFFFF;
+        }
+
+        .timer-container {
+            background: #1E1E1E;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid #333333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            color: #FFFFFF;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #2A2A2A;
+            border-radius: 8px;
+            border: 1px solid #404040;
+        }
+
+        .settings-header h2 {
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .setting-item {
+            margin-bottom: 8px;
+        }
+
+        .setting-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #B3B3B3;
+            font-weight: 500;
+        }
+
+        .setting-label span {
+            cursor: default;
+            user-select: none;
+        }
+
+        .segment-inputs {
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .segment-label {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #404040;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #2A2A2A !important;
+            color: #FFFFFF !important;
+            transition: all 0.2s;
+            cursor: text;
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+        }
+
+        .segment-label:focus {
+            outline: none;
+            border-color: #007bff !important;
+            background: #333333 !important;
+        }
+
+        .segment-label:hover {
+            border-color: #555555;
+        }
+
+        .segment-label:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #1A1A1A !important;
+        }
+
+        .input-group input[type="number"] {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #404040;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            background: #2A2A2A;
+            color: #FFFFFF;
+            transition: all 0.2s;
+        }
+
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #333333;
+        }
+
+        .input-group input[type="number"]:hover {
+            border-color: #555555;
+        }
+
+        .input-group span {
+            color: #B3B3B3;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #404040;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .toggle-switch:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #B3B3B3;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            transform: translateX(24px);
+            background: #FFFFFF;
+        }
+
+        .toggle-switch input:checked {
+            background: #007bff;
+        }
+
+        .toggle-switch:has(input:checked) {
+            background: #007bff;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #2A2A2A;
+            border-radius: 8px;
+            border: 2px solid #404040;
+        }
+
+        .current-segment {
+            font-size: 16px;
+            color: #B3B3B3;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .time-remaining {
+            font-size: 48px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #404040;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .segment-progress {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .segment-dot {
+            flex: 1;
+            height: 6px;
+            background: #404040;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .segment-dot.completed {
+            background: #28a745;
+        }
+
+        .segment-dot.active {
+            background: #007bff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+        }
+
+        .notification {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+
+        .notification.success {
+            background: #1a4d3a;
+            color: #4ade80;
+            border: 1px solid #22c55e;
+        }
+
+        .notification.warning {
+            background: #4d3319;
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .warning {
+            color: #dc3545 !important;
+        }
+
+        .warning .progress-fill {
+            background: linear-gradient(90deg, #dc3545, #c82333);
+        }
+
+        @media (max-width: 480px) {
+            .timer-container {
+                padding: 16px;
+                margin: 10px;
+            }
+
+            .time-remaining {
+                font-size: 36px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container">
+        <div class="header">
+            <h1>Presentation Timer</h1>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-header">
+                <h2>Settings</h2>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Audio Alerts</span>
+                    <div class="toggle-switch" role="switch" aria-checked="true" tabindex="0">
+                        <input type="checkbox" id="audioToggle" checked aria-label="Enable audio alerts">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="segment-inputs">
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label1" value="Introduction" maxlength="20" aria-label="Segment 1 label">
+                <input type="number" id="segment1" min="0.1" max="60" step="0.1" value="5" placeholder="5.0" aria-label="Segment 1 duration in minutes">
+                <span>min</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label2" value="Main Content" maxlength="20" aria-label="Segment 2 label">
+                <input type="number" id="segment2" min="0.1" max="60" step="0.1" value="15" placeholder="15.0" aria-label="Segment 2 duration in minutes">
+                <span>min</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label3" value="Demo/Examples" maxlength="20" aria-label="Segment 3 label">
+                <input type="number" id="segment3" min="0.1" max="60" step="0.1" value="10" placeholder="10.0" aria-label="Segment 3 duration in minutes">
+                <span>min</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label4" value="Q&A Session" maxlength="20" aria-label="Segment 4 label">
+                <input type="number" id="segment4" min="0.1" max="60" step="0.1" value="8" placeholder="8.0" aria-label="Segment 4 duration in minutes">
+                <span>min</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label5" value="Discussion" maxlength="20" aria-label="Segment 5 label">
+                <input type="number" id="segment5" min="0.1" max="60" step="0.1" value="5" placeholder="5.0" aria-label="Segment 5 duration in minutes">
+                <span>min</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="segment-label" id="label6" value="Conclusion" maxlength="20" aria-label="Segment 6 label">
+                <input type="number" id="segment6" min="0.1" max="60" step="0.1" value="2" placeholder="2.0" aria-label="Segment 6 duration in minutes">
+                <span>min</span>
+            </div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+
+        <div class="timer-display">
+            <div class="current-segment" id="currentSegment">Ready to start</div>
+            <div class="time-remaining" id="timeRemaining">00:00</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="segment-progress" id="segmentProgress">
+                <div class="segment-dot"></div>
+                <div class="segment-dot"></div>
+                <div class="segment-dot"></div>
+                <div class="segment-dot"></div>
+                <div class="segment-dot"></div>
+                <div class="segment-dot"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="startPauseBtn" aria-label="Start timer">Start</button>
+            <button class="btn btn-secondary" id="resetBtn" aria-label="Reset timer">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        class PresentationTimer {
+            constructor() {
+                this.segments = [];
+                this.segmentLabels = ['Introduction', 'Main Content', 'Demo/Examples', 'Q&A Session', 'Discussion', 'Conclusion'];
+                this.currentSegmentIndex = 0;
+                this.timeRemaining = 0;
+                this.totalTime = 0;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.interval = null;
+                this.audioEnabled = true;
+
+                this.initializeElements();
+                this.loadFromStorage();
+                this.bindEvents();
+                this.updateDisplay();
+            }
+
+            initializeElements() {
+                this.segmentInputs = [
+                    document.getElementById('segment1'),
+                    document.getElementById('segment2'),
+                    document.getElementById('segment3'),
+                    document.getElementById('segment4'),
+                    document.getElementById('segment5'),
+                    document.getElementById('segment6')
+                ];
+                this.labelInputs = [
+                    document.getElementById('label1'),
+                    document.getElementById('label2'),
+                    document.getElementById('label3'),
+                    document.getElementById('label4'),
+                    document.getElementById('label5'),
+                    document.getElementById('label6')
+                ];
+                this.audioToggle = document.getElementById('audioToggle');
+                this.toggleSwitch = document.querySelector('.toggle-switch');
+                this.currentSegmentEl = document.getElementById('currentSegment');
+                this.timeRemainingEl = document.getElementById('timeRemaining');
+                this.progressFillEl = document.getElementById('progressFill');
+                this.segmentProgressEl = document.getElementById('segmentProgress');
+                this.startPauseBtn = document.getElementById('startPauseBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.notificationEl = document.getElementById('notification');
+
+                // Ensure label inputs are editable
+                this.labelInputs.forEach(input => {
+                    if (input) {
+                        input.disabled = false;
+                        input.readOnly = false;
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.startPauseBtn.addEventListener('click', () => this.toggleTimer());
+                this.resetBtn.addEventListener('click', () => this.resetTimer());
+
+                // Audio toggle events
+                this.audioToggle.addEventListener('change', () => this.toggleAudio());
+                this.toggleSwitch.addEventListener('click', () => this.audioToggle.click());
+                this.toggleSwitch.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.audioToggle.click();
+                    }
+                });
+
+                // Segment duration change events
+                this.segmentInputs.forEach(input => {
+                    input.addEventListener('change', () => this.saveToStorage());
+                });
+
+                // Label change events with validation
+                this.labelInputs.forEach((input, index) => {
+                    input.addEventListener('blur', () => this.validateLabel(index));
+                    input.addEventListener('change', () => this.saveToStorage());
+                });
+            }
+
+            loadFromStorage() {
+                const saved = localStorage.getItem('presentationTimer');
+                if (saved) {
+                    const data = JSON.parse(saved);
+
+                    // Load segment durations
+                    this.segmentInputs.forEach((input, index) => {
+                        if (data.segments && data.segments[index] !== undefined) {
+                            input.value = data.segments[index];
+                        }
+                    });
+
+                    // Load segment labels
+                    if (data.labels) {
+                        this.labelInputs.forEach((input, index) => {
+                            if (data.labels[index]) {
+                                input.value = data.labels[index];
+                                this.segmentLabels[index] = data.labels[index];
+                            }
+                        });
+                    }
+
+                    // Load audio preference
+                    if (data.audioEnabled !== undefined) {
+                        this.audioEnabled = data.audioEnabled;
+                        this.audioToggle.checked = this.audioEnabled;
+                        this.updateToggleState();
+                    }
+                }
+            }
+
+            saveToStorage() {
+                const data = {
+                    segments: this.segmentInputs.map(input => parseFloat(input.value) || 0),
+                    labels: this.labelInputs.map(input => input.value.trim()),
+                    audioEnabled: this.audioEnabled
+                };
+                localStorage.setItem('presentationTimer', JSON.stringify(data));
+            }
+
+            getSegments() {
+                return this.segmentInputs.map(input => parseFloat(input.value) || 0);
+            }
+
+            getSegmentSeconds() {
+                return this.segmentInputs.map(input => {
+                    const minutes = parseFloat(input.value) || 0;
+                    const seconds = minutes * 60;
+                    // Round to nearest 5 seconds
+                    return Math.round(seconds / 5) * 5;
+                });
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            toggleAudio() {
+                this.audioEnabled = this.audioToggle.checked;
+                this.updateToggleState();
+                this.saveToStorage();
+
+                const message = this.audioEnabled ? 'Audio alerts enabled' : 'Audio alerts disabled';
+                this.showNotification(message);
+            }
+
+            updateToggleState() {
+                this.toggleSwitch.setAttribute('aria-checked', this.audioEnabled.toString());
+            }
+
+            validateLabel(index) {
+                const input = this.labelInputs[index];
+                const value = input.value.trim();
+
+                // Check for empty label
+                if (!value) {
+                    input.value = this.segmentLabels[index]; // Restore previous value
+                    this.showNotification('Segment label cannot be empty', 'warning');
+                    return false;
+                }
+
+                // Check for duplicate labels
+                const otherLabels = this.labelInputs
+                    .map((inp, i) => i !== index ? inp.value.trim() : null)
+                    .filter(label => label !== null);
+
+                if (otherLabels.includes(value)) {
+                    input.value = this.segmentLabels[index]; // Restore previous value
+                    this.showNotification('Segment labels must be unique', 'warning');
+                    return false;
+                }
+
+                // Update the stored label
+                this.segmentLabels[index] = value;
+                return true;
+            }
+
+            showNotification(message, type = 'success') {
+                this.notificationEl.textContent = message;
+                this.notificationEl.className = `notification ${type} show`;
+                setTimeout(() => {
+                    this.notificationEl.classList.remove('show');
+                }, 3000);
+            }
+
+            playAlert() {
+                if (!this.audioEnabled) return;
+
+                // Create audio context for beep sound
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            updateDisplay() {
+                const segmentSeconds = this.getSegmentSeconds();
+
+                if (!this.isRunning && !this.isPaused) {
+                    this.currentSegmentEl.textContent = 'Ready to start';
+                    this.timeRemainingEl.textContent = '00:00';
+                    this.progressFillEl.style.width = '0%';
+                } else {
+                    this.currentSegmentEl.textContent = this.segmentLabels[this.currentSegmentIndex];
+                    this.timeRemainingEl.textContent = this.formatTime(this.timeRemaining);
+
+                    const currentSegmentTime = segmentSeconds[this.currentSegmentIndex];
+                    const progress = ((currentSegmentTime - this.timeRemaining) / currentSegmentTime) * 100;
+                    this.progressFillEl.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+
+                    // Warning when less than 30 seconds remaining
+                    if (this.timeRemaining <= 30 && this.timeRemaining > 0) {
+                        this.timeRemainingEl.classList.add('warning');
+                        this.progressFillEl.parentElement.classList.add('warning');
+                    } else {
+                        this.timeRemainingEl.classList.remove('warning');
+                        this.progressFillEl.parentElement.classList.remove('warning');
+                    }
+                }
+
+                // Update segment progress dots
+                const dots = this.segmentProgressEl.children;
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].className = 'segment-dot';
+                    if (i < this.currentSegmentIndex) {
+                        dots[i].classList.add('completed');
+                    } else if (i === this.currentSegmentIndex && this.isRunning) {
+                        dots[i].classList.add('active');
+                    }
+                }
+            }
+
+            toggleTimer() {
+                if (!this.isRunning && !this.isPaused) {
+                    this.startTimer();
+                } else if (this.isRunning) {
+                    this.pauseTimer();
+                } else if (this.isPaused) {
+                    this.resumeTimer();
+                }
+            }
+
+            startTimer() {
+                // Update segment labels from inputs
+                this.labelInputs.forEach((input, index) => {
+                    if (input.value.trim()) {
+                        this.segmentLabels[index] = input.value.trim();
+                    }
+                });
+
+                this.segments = this.getSegmentSeconds();
+                if (this.segments.every(s => s === 0)) {
+                    this.showNotification('Please set at least one segment duration', 'warning');
+                    return;
+                }
+
+                this.saveToStorage();
+                this.currentSegmentIndex = 0;
+                this.timeRemaining = this.segments[0];
+                this.isRunning = true;
+                this.isPaused = false;
+
+                this.startPauseBtn.textContent = 'Pause';
+                this.startPauseBtn.setAttribute('aria-label', 'Pause timer');
+                this.segmentInputs.forEach(input => input.disabled = true);
+                this.labelInputs.forEach(input => input.disabled = true);
+
+                this.interval = setInterval(() => this.tick(), 1000);
+                this.updateDisplay();
+                this.showNotification('Timer started!');
+            }
+
+            pauseTimer() {
+                this.isRunning = false;
+                this.isPaused = true;
+                clearInterval(this.interval);
+                this.startPauseBtn.textContent = 'Resume';
+                this.startPauseBtn.setAttribute('aria-label', 'Resume timer');
+                this.showNotification('Timer paused');
+            }
+
+            resumeTimer() {
+                this.isRunning = true;
+                this.isPaused = false;
+                this.startPauseBtn.textContent = 'Pause';
+                this.startPauseBtn.setAttribute('aria-label', 'Pause timer');
+                this.interval = setInterval(() => this.tick(), 1000);
+                this.showNotification('Timer resumed');
+            }
+
+            resetTimer() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.currentSegmentIndex = 0;
+                this.timeRemaining = 0;
+
+                clearInterval(this.interval);
+                this.startPauseBtn.textContent = 'Start';
+                this.startPauseBtn.setAttribute('aria-label', 'Start timer');
+                this.segmentInputs.forEach(input => input.disabled = false);
+                this.labelInputs.forEach(input => input.disabled = false);
+
+                this.updateDisplay();
+                this.showNotification('Timer reset');
+            }
+
+            tick() {
+                this.timeRemaining--;
+
+                if (this.timeRemaining <= 0) {
+                    this.playAlert();
+
+                    if (this.currentSegmentIndex < this.segments.length - 1) {
+                        this.showNotification(`${this.segmentLabels[this.currentSegmentIndex]} completed!`);
+
+                        this.currentSegmentIndex++;
+                        this.timeRemaining = this.segments[this.currentSegmentIndex];
+                    } else {
+                        this.isRunning = false;
+                        clearInterval(this.interval);
+                        this.startPauseBtn.textContent = 'Start';
+                        this.startPauseBtn.setAttribute('aria-label', 'Start timer');
+                        this.segmentInputs.forEach(input => input.disabled = false);
+                        this.labelInputs.forEach(input => input.disabled = false);
+                        this.showNotification('Presentation completed! 🎉');
+                        this.currentSegmentEl.textContent = 'Presentation Complete';
+                        this.timeRemainingEl.textContent = '00:00';
+                        return;
+                    }
+                }
+
+                this.updateDisplay();
+            }
+        }
+
+        // Initialize the timer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new PresentationTimer();
+        });
+    </script>
+</body>
+</html>
