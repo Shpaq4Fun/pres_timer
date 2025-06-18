@@ -37,6 +37,10 @@ The Presentation Timer uses your browser's local storage to save your settings. 
 
 When you revisit the application in the same browser, your previous configuration will be automatically loaded, saving you from re-entering the details every time.
 
+## Live Demo
+You can access a live version of the Presentation Timer here:
+[Presentation Timer Live Demo](https://shpaq4fun.github.io/pres_timer/)
+
 ## Running the Application
 This is a client-side web application built with HTML, CSS, and JavaScript.
 To run the Presentation Timer:
